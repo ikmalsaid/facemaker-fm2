@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FacemakerClient API Documentation</title>
+    <style>
+        :root {
+            --bg-color: #111111;
+            --text-color: #ffffff;
+            --accent-color: #ff4081;
+            --border-color: #333333;
+            --hover-color: #222222;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .api-table th, .api-table td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .api-table th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
+
+        .api-table tr:hover {
+            background: var(--hover-color);
+        }
+
+        .endpoint {
+            color: var(--accent-color);
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+
+        .playground {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            color: var(--accent-color);
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .api-table {
+                font-size: 0.9em;
+            }
+            
+            .playground {
+                padding: 1rem;
+            }
+        }
+
+        .test-api-btn {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: var(--accent-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .result-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .result {
+            flex: 1;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .preview {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+        }
+
+        .results-table-container {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .results-table th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
+
+        .results-table .preview-cell {
+            width: 200px;
+            text-align: center;
+        }
+
+        .results-table .preview-cell img,
+        .results-table .preview-cell video {
+            max-width: 200px;
+            max-height: 150px;
+            object-fit: contain;
+        }
+
+        .download-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .download-btn:hover {
+            opacity: 0.9;
+        }
+
+        select {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        select option {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 0.5rem;
+        }
+
+        /* For Webkit browsers like Chrome/Safari */
+        select::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        select::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        select::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .error-message {
+            color: #ff4081;
+            background: rgba(255, 64, 129, 0.1);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 64, 129, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-content" style="text-align: center; margin-bottom: 10px;">
+            <h1 style="margin-bottom: 10px;">Facemaker Client API Documentation</h1>
+            <h3 style="margin-bottom: 2rem; color: #888; font-size: 1em;">Copyright (C) 2025 Ikmal Said. All rights reserved</h3>
+            <button id="openPlayground" class="test-api-btn">Open API Playground</button>
+        </div>
+        
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Description</th>
+                    <th>Parameters</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="endpoint">/api/swap/image</td>
+                    <td>Swap faces in images</td>
+                    <td>
+                        <strong>Files:</strong><br>
+                        - target: Target image(s)<br>
+                        - source: Source image(s)<br>
+                        <strong>Form Data:</strong><br>
+                        - source_face_index: int (default: 0)<br>
+                        - target_face_index: int (default: 0)<br>
+                        - swap_all: bool (default: true)<br>
+                        - detect_direction: string (default: 'left-right')
+                    </td>
+                </tr>
+                <tr>
+                    <td class="endpoint">/api/swap/video</td>
+                    <td>Swap faces in videos</td>
+                    <td>
+                        <strong>Files:</strong><br>
+                        - target: Target video(s)<br>
+                        - source: Source image(s)<br>
+                        <strong>Form Data:</strong><br>
+                        - source_face_index: int (default: 0)<br>
+                        - target_face_index: int (default: 0)<br>
+                        - swap_all: bool (default: true)<br>
+                        - detect_direction: string (default: 'left-right')
+                    </td>
+                </tr>
+                <tr>
+                    <td class="endpoint">/api/detect</td>
+                    <td>Detect faces in image</td>
+                    <td>
+                        <strong>Files:</strong><br>
+                        - image: Input image<br>
+                        <strong>Form Data:</strong><br>
+                        - return_thumbnails: bool (default: false)<br>
+                        - return_marked: bool (default: false)<br>
+                        - detect_direction: string (default: 'left-right')
+                    </td>
+                </tr>
+                <tr>
+                    <td class="endpoint">/api/enhance/image</td>
+                    <td>Enhance faces in images</td>
+                    <td>
+                        <strong>Files:</strong><br>
+                        - target: Target image(s)<br>
+                        <strong>Form Data:</strong><br>
+                        - target_face_index: int (default: 0)<br>
+                        - enhance_all: bool (default: true)<br>
+                        - detect_direction: string (default: 'left-right')
+                    </td>
+                </tr>
+                <tr>
+                    <td class="endpoint">/api/enhance/video</td>
+                    <td>Enhance faces in videos</td>
+                    <td>
+                        <strong>Files:</strong><br>
+                        - target: Target video(s)<br>
+                        <strong>Form Data:</strong><br>
+                        - target_face_index: int (default: 0)<br>
+                        - enhance_all: bool (default: true)<br>
+                        - detect_direction: string (default: 'left-right')
+                    </td>
+                </tr>
+                <tr>
+                    <td class="endpoint">/api/settings</td>
+                    <td>Update settings</td>
+                    <td>
+                        <strong>Form Data:</strong><br>
+                        - face_landmarker: string<br>
+                        - face_enhancer: string<br>
+                        - face_detector_score: float (0-1)<br>
+                        - reference_face_distance: float (0-1)<br>
+                        - save_format: string<br>
+                        - save_to: string<br>
+                        - skip_enhancer: bool
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Add Modal Dialog -->
+        <div id="playgroundModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>API Playground</h2>
+                <div class="playground">
+                    <form id="apiForm">
+                        <div class="form-group">
+                            <label for="endpoint">Endpoint</label>
+                            <select id="endpoint" required>
+                                <option value="/api/swap/image">Face Swap (Image)</option>
+                                <option value="/api/swap/video">Face Swap (Video)</option>
+                                <option value="/api/detect">Face Detection</option>
+                                <option value="/api/enhance/image">Face Enhancement (Image)</option>
+                                <option value="/api/enhance/video">Face Enhancement (Video)</option>
+                                <option value="/api/settings">Settings</option>
+                            </select>
+                        </div>
+
+                        <div id="fileInputs">
+                            <!-- Dynamic file inputs will be added here -->
+                        </div>
+
+                        <div id="formInputs">
+                            <!-- Dynamic form inputs will be added here -->
+                        </div>
+
+                        <button type="submit">Send Request</button>
+                    </form>
+
+                    <div class="loading">
+                        <div class="spinner" style="display: inline-block; vertical-align: middle;"></div>
+                        <span style="display: inline-block; vertical-align: middle; margin-left: 8px;">Processing request...</span>
+                    </div>
+                    <div class="result-container">
+                        <div id="errorMessage" class="error-message" style="display: none;"></div>
+                        <div class="results-table-container" id="resultsContainer" style="display: none;">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Preview</th>
+                                        <th>Filename</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultsTableBody">
+                                    <!-- Results will be dynamically added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const endpointConfigs = {
+            '/api/swap/image': {
+                files: [
+                    { name: 'target', label: 'Target Image(s)', multiple: true, accept: 'image/*' },
+                    { name: 'source', label: 'Source Image(s)', multiple: true, accept: 'image/*' }
+                ],
+                params: [
+                    { name: 'source_face_index', type: 'number', default: 0, label: 'Source Face Index' },
+                    { name: 'target_face_index', type: 'number', default: 0, label: 'Target Face Index' },
+                    { name: 'swap_all', type: 'checkbox', default: true, label: 'Swap All Faces' },
+                    { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
+                      options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
+                ]
+            },
+            '/api/swap/video': {
+                files: [
+                    { name: 'target', label: 'Target Video(s)', multiple: true, accept: 'video/*' },
+                    { name: 'source', label: 'Source Image(s)', multiple: true, accept: 'image/*' }
+                ],
+                params: [
+                    { name: 'source_face_index', type: 'number', default: 0, label: 'Source Face Index' },
+                    { name: 'target_face_index', type: 'number', default: 0, label: 'Target Face Index' },
+                    { name: 'swap_all', type: 'checkbox', default: true, label: 'Swap All Faces' },
+                    { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
+                      options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
+                ]
+            },
+            '/api/detect': {
+                files: [
+                    { name: 'image', label: 'Input Image', multiple: false, accept: 'image/*' }
+                ],
+                params: [
+                    { name: 'return_thumbnails', type: 'checkbox', default: true, label: 'Return Thumbnails' },
+                    { name: 'return_marked', type: 'checkbox', default: true, label: 'Return Marked Image' },
+                    { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
+                      options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
+                ]
+            },
+            '/api/enhance/image': {
+                files: [
+                    { name: 'target', label: 'Target Image(s)', multiple: true, accept: 'image/*' }
+                ],
+                params: [
+                    { name: 'target_face_index', type: 'number', default: 0, label: 'Target Face Index' },
+                    { name: 'enhance_all', type: 'checkbox', default: true, label: 'Enhance All Faces' },
+                    { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
+                      options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
+                ]
+            },
+            '/api/enhance/video': {
+                files: [
+                    { name: 'target', label: 'Target Video(s)', multiple: true, accept: 'video/*' }
+                ],
+                params: [
+                    { name: 'target_face_index', type: 'number', default: 0, label: 'Target Face Index' },
+                    { name: 'enhance_all', type: 'checkbox', default: true, label: 'Enhance All Faces' },
+                    { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
+                      options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
+                ]
+            },
+            '/api/settings': {
+                files: [],
+                params: [
+                    { name: 'face_landmarker', type: 'select', default: 'peppa_wutz', label: 'Face Landmarker',
+                      options: ['peppa_wutz', '2dfan4'] },
+                    { name: 'face_enhancer', type: 'select', default: 'gfpgan_1.4', label: 'Face Enhancer',
+                      options: ['gfpgan_1.4', 'gfpgan_1.3', 'restoreformer', 'codeformer'] },
+                    { name: 'face_detector_score', type: 'number', default: 0.5, label: 'Face Detector Score', 
+                      step: 0.1, min: 0, max: 1 },
+                    { name: 'reference_face_distance', type: 'number', default: 0.5, label: 'Reference Face Distance',
+                      step: 0.1, min: 0, max: 1 },
+                    { name: 'skip_enhancer', type: 'checkbox', default: false, label: 'Skip Enhancer' }
+                ]
+            }
+        };
+
+        function updateForm() {
+            const endpoint = document.getElementById('endpoint').value;
+            const config = endpointConfigs[endpoint];
+            
+            // Update file inputs
+            const fileInputs = document.getElementById('fileInputs');
+            fileInputs.innerHTML = config.files.map(file => `
+                <div class="form-group">
+                    <label for="${file.name}">${file.label}</label>
+                    <input type="file" id="${file.name}" name="${file.name}" ${file.multiple ? 'multiple' : ''} accept="${file.accept || '*'}" required>
+                </div>
+            `).join('');
+            
+            // Update form inputs
+            const formInputs = document.getElementById('formInputs');
+            formInputs.innerHTML = config.params.map(param => {
+                if (param.type === 'select') {
+                    return `
+                        <div class="form-group">
+                            <label for="${param.name}">${param.label}</label>
+                            <select id="${param.name}" name="${param.name}">
+                                ${param.options.map(opt => `
+                                    <option value="${opt}" ${opt === param.default ? 'selected' : ''}>${opt}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else if (param.type === 'checkbox') {
+                    return `
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="${param.name}" name="${param.name}" ${param.default ? 'checked' : ''}>
+                                ${param.label}
+                            </label>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="form-group">
+                            <label for="${param.name}">${param.label}</label>
+                            <input type="${param.type}" id="${param.name}" name="${param.name}" 
+                                   value="${param.default}" step="${param.step || ''}"
+                                   min="${param.min || ''}" max="${param.max || ''}">
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        document.getElementById('endpoint').addEventListener('change', updateForm);
+        updateForm();
+
+        // Add modal functionality
+        const modal = document.getElementById('playgroundModal');
+        const openBtn = document.getElementById('openPlayground');
+        const closeBtn = document.querySelector('.close');
+
+        openBtn.onclick = () => modal.style.display = 'block';
+        closeBtn.onclick = () => modal.style.display = 'none';
+        window.onclick = (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        };
+
+        // Modify the form submission handler
+        document.getElementById('apiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const endpoint = document.getElementById('endpoint').value;
+            const formData = new FormData();
+            const config = endpointConfigs[endpoint];
+            
+            const loading = document.querySelector('.loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsTableBody = document.getElementById('resultsTableBody');
+
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            
+            try {
+                // Add files
+                config.files.forEach(file => {
+                    const input = document.getElementById(file.name);
+                    if (file.multiple) {
+                        Array.from(input.files).forEach(f => {
+                            // Ensure each file is properly appended
+                            formData.append(file.name, f, f.name);
+                        });
+                    } else {
+                        formData.append(file.name, input.files[0], input.files[0].name);
+                    }
+                });
+                
+                // Add parameters
+                config.params.forEach(param => {
+                    const input = document.getElementById(param.name);
+                    if (param.type === 'checkbox') {
+                        formData.append(param.name, input.checked);
+                    } else {
+                        formData.append(param.name, input.value);
+                    }
+                });
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Check if response contains only a message
+                    if (data.results.length === 1 && data.results[0].message) {
+                        errorMessage.style.display = 'block';
+                        errorMessage.style.color = '#4CAF50'; // Change color to green for success
+                        errorMessage.textContent = data.results[0].message;
+                        resultsContainer.style.display = 'none';
+                    } else {
+                        resultsTableBody.innerHTML = '';
+                        
+                        // Handle face detection response differently
+                        if (endpoint === '/api/detect') {
+                            // Add thumbnails if present
+                            if (data.results.thumbnails) {
+                                data.results.thumbnails.forEach(item => {
+                                    addResultRow(item.filename, `Face: ${item.label}`);
+                                });
+                            }
+                            
+                            // Add marked image if present
+                            if (data.results.marked_image) {
+                                addResultRow(data.results.marked_image.filename, 'Marked Image');
+                            }
+                        } else {
+                            // Handle other endpoints (swap/enhance)
+                            data.results.forEach(item => {
+                                addResultRow(item.filename);
+                            });
+                        }
+                        
+                        resultsContainer.style.display = 'block';
+                    }
+                } else {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+            } catch (error) {
+                errorMessage.style.color = '#ff4081'; // Reset to error color
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        // Helper function to add a row to the results table
+        function addResultRow(filename, description = '') {
+            const row = document.createElement('tr');
+            
+            // Preview cell
+            const previewCell = document.createElement('td');
+            previewCell.className = 'preview-cell';
+            
+            // Create preview by fetching the file
+            fetch(`/api/download/${encodeURIComponent(filename)}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    if (filename.toLowerCase().match(/\.(mp4)$/i)) {
+                        const video = document.createElement('video');
+                        video.src = url;
+                        video.controls = true;
+                        video.autoplay = true;
+                        video.muted = true;
+                        video.loop = true;
+                        video.style.maxWidth = '200px';
+                        video.style.maxHeight = '150px';
+                        video.style.objectFit = 'contain';
+                        video.preload = 'metadata';
+                        previewCell.appendChild(video);
+                    } else {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        previewCell.appendChild(img);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading preview:', error);
+                    const errorText = document.createElement('div');
+                    errorText.textContent = 'Preview not available';
+                    errorText.style.color = 'var(--accent-color)';
+                    previewCell.appendChild(errorText);
+                });
+            
+            // Filename cell
+            const filenameCell = document.createElement('td');
+            filenameCell.textContent = description || filename;
+            
+            // Download button cell
+            const actionCell = document.createElement('td');
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            downloadBtn.textContent = 'Download';
+            downloadBtn.onclick = () => {
+                window.location.href = `/api/download/${encodeURIComponent(filename)}`;
+            };
+            actionCell.appendChild(downloadBtn);
+            
+            // Add cells to row
+            row.appendChild(previewCell);
+            row.appendChild(filenameCell);
+            row.appendChild(actionCell);
+            
+            // Add row to table
+            document.getElementById('resultsTableBody').appendChild(row);
+        }
+    </script>
+</body>
+</html> 
