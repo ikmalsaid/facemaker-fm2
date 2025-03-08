@@ -372,7 +372,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="endpoint">/api/detect</td>
+                    <td class="endpoint">/api/detect/image</td>
                     <td>Detect faces in image</td>
                     <td>
                         <strong>Files:</strong><br>
@@ -381,6 +381,19 @@
                         - return_thumbnails: bool (default: false)<br>
                         - return_marked: bool (default: false)<br>
                         - detect_direction: string (default: 'left-right')
+                    </td>
+                </tr>
+                <tr>
+                    <td class="endpoint">/api/detect/video</td>
+                    <td>Detect faces in video</td>
+                    <td>
+                        <strong>Files:</strong><br>
+                        - video: Input video<br>
+                        <strong>Form Data:</strong><br>
+                        - return_thumbnails: bool (default: false)<br>
+                        - return_marked: bool (default: false)<br>
+                        - detect_direction: string (default: 'left-right')<br>
+                        - unique_faces: bool (default: true)
                     </td>
                 </tr>
                 <tr>
@@ -436,7 +449,8 @@
                             <select id="endpoint" required>
                                 <option value="/api/swap/image">Face Swap (Image)</option>
                                 <option value="/api/swap/video">Face Swap (Video)</option>
-                                <option value="/api/detect">Face Detection</option>
+                                <option value="/api/detect/image">Face Detection (Image)</option>
+                                <option value="/api/detect/video">Face Detection (Video)</option>
                                 <option value="/api/enhance/image">Face Enhancement (Image)</option>
                                 <option value="/api/enhance/video">Face Enhancement (Video)</option>
                                 <option value="/api/settings">Settings</option>
@@ -508,7 +522,7 @@
                       options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
                 ]
             },
-            '/api/detect': {
+            '/api/detect/image': {
                 files: [
                     { name: 'image', label: 'Input Image', multiple: false, accept: 'image/*' }
                 ],
@@ -517,6 +531,18 @@
                     { name: 'return_marked', type: 'checkbox', default: true, label: 'Return Marked Image' },
                     { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
                       options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] }
+                ]
+            },
+            '/api/detect/video': {
+                files: [
+                    { name: 'video', label: 'Input Video', multiple: false, accept: 'video/*' }
+                ],
+                params: [
+                    { name: 'return_thumbnails', type: 'checkbox', default: true, label: 'Return Thumbnails' },
+                    { name: 'return_marked', type: 'checkbox', default: true, label: 'Return Marked Video' },
+                    { name: 'detect_direction', type: 'select', default: 'left-right', label: 'Detect Direction',
+                      options: ['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best'] },
+                    { name: 'unique_faces', type: 'checkbox', default: true, label: 'Detect Unique Faces' }
                 ]
             },
             '/api/enhance/image': {
@@ -544,11 +570,13 @@
             '/api/settings': {
                 files: [],
                 params: [
+                    { name: 'face_swapper_precision', type: 'select', default: 'fp32', label: 'Face Swapper Precision',
+                      options: ['fp32', 'fp16'] },
                     { name: 'face_landmarker', type: 'select', default: 'peppa_wutz', label: 'Face Landmarker',
                       options: ['peppa_wutz', '2dfan4'] },
                     { name: 'face_enhancer', type: 'select', default: 'gfpgan_1.4', label: 'Face Enhancer',
                       options: ['gfpgan_1.4', 'gfpgan_1.3', 'restoreformer', 'codeformer'] },
-                    { name: 'face_detector_score', type: 'number', default: 0.5, label: 'Face Detector Score', 
+                    { name: 'face_detector_score', type: 'number', default: 0.799, label: 'Face Detector Score', 
                       step: 0.1, min: 0, max: 1 },
                     { name: 'reference_face_distance', type: 'number', default: 0.5, label: 'Reference Face Distance',
                       step: 0.1, min: 0, max: 1 },
@@ -670,24 +698,35 @@
                 
                 if (data.success) {
                     // Check if response contains only a message
-                    if (data.results.length === 1 && data.results[0].message) {
+                    if (data.message) {
                         errorMessage.style.display = 'block';
-                        errorMessage.style.color = '#4CAF50'; // Change color to green for success
-                        errorMessage.textContent = data.results[0].message;
+                        errorMessage.style.color = '#4CAF50';
+                        errorMessage.textContent = data.message;
                         resultsContainer.style.display = 'none';
                     } else {
                         resultsTableBody.innerHTML = '';
                         
-                        // Handle face detection response differently
-                        if (endpoint === '/api/detect') {
+                        // Handle video detection response
+                        if (endpoint === '/api/detect/video') {
+                            // Add marked video if present
+                            if (data.results.marked_video) {
+                                addResultRow(data.results.marked_video.filename, `Marked Video (${data.results.total_faces} faces detected)`);
+                            }
+                            
                             // Add thumbnails if present
                             if (data.results.thumbnails) {
                                 data.results.thumbnails.forEach(item => {
                                     addResultRow(item.filename, `Face: ${item.label}`);
                                 });
                             }
+                        } else if (endpoint === '/api/detect/image') {
+                            // Handle image detection response
+                            if (data.results.thumbnails) {
+                                data.results.thumbnails.forEach(item => {
+                                    addResultRow(item.filename, `Face: ${item.label}`);
+                                });
+                            }
                             
-                            // Add marked image if present
                             if (data.results.marked_image) {
                                 addResultRow(data.results.marked_image.filename, 'Marked Image');
                             }
@@ -704,7 +743,7 @@
                     throw new Error(data.error || 'Unknown error occurred');
                 }
             } catch (error) {
-                errorMessage.style.color = '#ff4081'; // Reset to error color
+                errorMessage.style.color = '#ff4081';
                 errorMessage.textContent = `Error: ${error.message}`;
                 errorMessage.style.display = 'block';
             } finally {

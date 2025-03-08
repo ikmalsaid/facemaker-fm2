@@ -9,11 +9,10 @@ import numpy as np
 import onnxruntime
 from tqdm.auto import tqdm
 from datetime import datetime
-from importlib import resources
-from colorpaws import setup_logger
+from colorpaws import configure
+from scripts.face_analyser import Face
 from moviepy.editor import VideoFileClip
 from scripts import face_analyser, face_utils, face_store, face_swapper, face_enhancer
-from scripts.face_analyser import Face
 
 class FacemakerFM2:
     """Copyright (C) 2025 Ikmal Said. All rights reserved"""
@@ -57,7 +56,7 @@ class FacemakerFM2:
             log_on (bool): If True, log to console
             log_to (str): If not None, log to file
         """
-        self.logger = setup_logger(self.__class__.__name__, log_on, log_to)
+        self.logger = configure(self.__class__.__name__, log_on, log_to)
  
         self.face_swapper_precision = face_swapper_precision
         self.face_landmarker = face_landmarker
@@ -279,7 +278,7 @@ class FacemakerFM2:
         face_swapper.post_process()
         return result
 
-    def __gettaskid(self):
+    def get_taskid(self):
         """
         Generate a unique task ID for request tracking.
         Returns a combination of timestamp and UUID to ensure uniqueness.
@@ -298,7 +297,7 @@ class FacemakerFM2:
             video = If True, set format to 'mp4'
             suffix: Optional suffix for output filename (default '_swapped')
         """
-        task_id = self.__gettaskid()
+        task_id = self.get_taskid()
 
         if self.startup_mode == 'api':
             src_name = os.path.splitext(os.path.basename(target_path).split('_')[-1])[0]

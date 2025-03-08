@@ -100,6 +100,7 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
         @app.route('/api/swap/video', methods=['POST'])
         def swap_video():
             try:
+                task_id = client.get_taskid()
                 # Get files from request
                 target_files = request.files.getlist('target')
                 source_files = request.files.getlist('source')
@@ -109,12 +110,12 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
                 source_paths = []
                 
                 for file in target_files:
-                    temp_path = os.path.join(tempfile.gettempdir(), file.filename)
+                    temp_path = os.path.join(tempfile.gettempdir(), f"{task_id}_{file.filename}")
                     file.save(temp_path)
                     target_paths.append(temp_path)
                     
                 for file in source_files:
-                    temp_path = os.path.join(tempfile.gettempdir(), file.filename)
+                    temp_path = os.path.join(tempfile.gettempdir(), f"{task_id}_{file.filename}")
                     file.save(temp_path)
                     source_paths.append(temp_path)
                 
@@ -145,7 +146,7 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
                     'error': str(e)
                 })
                 
-        @app.route('/api/detect', methods=['POST'])
+        @app.route('/api/detect/image', methods=['POST'])
         def detect_faces():
             try:
                 task_id = client.get_taskid()
@@ -160,7 +161,7 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
                 detect_direction = request.form.get('detect_direction', 'left-right')
                 
                 # Detect faces
-                _, total, thumbnails, marked = client.get_faces(
+                _, total, thumbnails, marked = client.get_faces_from_image(
                     temp_path, return_thumbnails,
                     return_marked, detect_direction
                 )
@@ -182,10 +183,62 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
                     result['thumbnails'] = thumbnail_paths
                     
                 if marked is not None:
-                    marked_path = os.path.join(tempfile.gettempdir(), f"{task_id}_marked_{image_file.filename}")
-                    cv2.imwrite(marked_path, cv2.cvtColor(marked, cv2.COLOR_RGB2BGR))
                     result['marked_image'] = {
-                        'filename': os.path.basename(marked_path)
+                        'filename': os.path.basename(marked)
+                    }
+                
+                return jsonify({
+                    'success': True,
+                    'results': result
+                })
+                
+            except Exception as e:
+                return jsonify({
+                    'success': False,
+                    'error': str(e)
+                })
+            
+        @app.route('/api/detect/video', methods=['POST'])
+        def detect_faces_video():
+            try:
+                task_id = client.get_taskid()
+                # Get video file
+                video_file = request.files['video']
+                temp_path = os.path.join(tempfile.gettempdir(), f"{task_id}_{video_file.filename}")
+                video_file.save(temp_path)
+                
+                # Get parameters
+                return_thumbnails = request.form.get('return_thumbnails', 'false').lower() == 'true'
+                return_marked = request.form.get('return_marked', 'false').lower() == 'true'
+                detect_direction = request.form.get('detect_direction', 'left-right')
+                unique_faces = request.form.get('unique_faces', 'true').lower() == 'true'
+                
+                # Detect faces
+                _, total, thumbnails, marked = client.get_faces_from_video(
+                    temp_path, return_thumbnails,
+                    return_marked, detect_direction,
+                    unique_faces
+                )
+                
+                # Save thumbnails and marked video if present
+                result = {
+                    'total_faces': total
+                }
+                
+                if thumbnails:
+                    thumbnail_paths = []
+                    for idx, (thumb, label) in enumerate(thumbnails):
+                        thumb_path = os.path.join(tempfile.gettempdir(), f"{task_id}_thumb_{idx}_{video_file.filename}.jpg")
+                        cv2.imwrite(thumb_path, cv2.cvtColor(thumb, cv2.COLOR_RGB2BGR))
+                        thumbnail_paths.append({
+                            'filename': os.path.basename(thumb_path),
+                            'label': label
+                        })
+                    result['thumbnails'] = thumbnail_paths
+                    
+                if marked is not None:
+                    result['marked_video'] = {
+                        'filename': os.path.basename(marked)
                     }
                 
                 return jsonify({
@@ -202,13 +255,14 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
         @app.route('/api/enhance/image', methods=['POST'])
         def enhance_image():
             try:
+                task_id = client.get_taskid()
                 # Get files from request
                 target_files = request.files.getlist('target')
                 
                 # Save uploaded files temporarily
                 target_paths = []
                 for file in target_files:
-                    temp_path = os.path.join(tempfile.gettempdir(), file.filename)
+                    temp_path = os.path.join(tempfile.gettempdir(), f"{task_id}_{file.filename}")
                     file.save(temp_path)
                     target_paths.append(temp_path)
                 
@@ -240,13 +294,14 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
         @app.route('/api/enhance/video', methods=['POST'])
         def enhance_video():
             try:
+                task_id = client.get_taskid()
                 # Get files from request
                 target_files = request.files.getlist('target')
                 
                 # Save uploaded files temporarily
                 target_paths = []
                 for file in target_files:
-                    temp_path = os.path.join(tempfile.gettempdir(), file.filename)
+                    temp_path = os.path.join(tempfile.gettempdir, f"{task_id}_{file.filename}")
                     file.save(temp_path)
                     target_paths.append(temp_path)
                 
@@ -283,7 +338,7 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
                     'face_swapper_precision': request.form.get('face_swapper_precision', 'fp32'),
                     'face_landmarker': request.form.get('face_landmarker', 'peppa_wutz'),
                     'face_enhancer': request.form.get('face_enhancer', 'gfpgan_1.4'),
-                    'face_detector_score': float(request.form.get('face_detector_score', '0.5')),
+                    'face_detector_score': float(request.form.get('face_detector_score', '0.799')),
                     'reference_face_distance': float(request.form.get('reference_face_distance', '0.5')),
                     'skip_enhancer': request.form.get('skip_enhancer', 'false') == 'true'
                 }
