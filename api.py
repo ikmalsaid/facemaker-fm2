@@ -33,7 +33,7 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
 
         @app.route('/')
         def api_docs():
-            return render_template('index.py')
+            return render_template('index.html')
 
         @app.route('/api/download/<path:filename>')
         def download_file(filename):
