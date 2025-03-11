@@ -9,7 +9,7 @@ import numpy as np
 import onnxruntime
 from tqdm.auto import tqdm
 from datetime import datetime
-from colorpaws import configure
+from colorpaws import ColorPaws
 from scripts.face_analyser import Face
 from moviepy.editor import VideoFileClip
 from scripts import face_analyser, face_utils, face_store, face_swapper, face_enhancer
@@ -56,7 +56,7 @@ class FacemakerFM2:
             log_on (bool): If True, log to console
             log_to (str): If not None, log to file
         """
-        self.logger = configure(self.__class__.__name__, log_on, log_to)
+        self.logger = ColorPaws(self.__class__.__name__, log_on, log_to)
  
         self.face_swapper_precision = face_swapper_precision
         self.face_landmarker = face_landmarker
