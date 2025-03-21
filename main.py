@@ -104,21 +104,23 @@ class FacemakerFM2:
         from api import FacemakerWebAPI
         FacemakerWebAPI(self, host=host, port=port, debug=debug)
         
-    def start_webui(self, host: str = "0.0.0.0", port: int = 3225, browser: bool = True,
-                    upload_size: str = "10MB", public: bool = False, limit: int = 10):
+    def start_webui(self, host: str = "0.0.0.0", port: int = 7680, browser: bool = False, upload_size: str = "10MB", 
+                    public: bool = False, limit: int = 10, quiet: bool = False):
         """
         Start WebUI with all features.
         
         Parameters:
         - host (str): Server host (default: "0.0.0.0")
-        - port (int): Server port (default: 3225) 
-        - browser (bool): Launch browser automatically (default: True)
-        - upload_size (str): Maximum file size for uploads (default: "4MB")
+        - port (int): Server port (default: 7680) 
+        - browser (bool): Launch browser automatically (default: False)
+        - upload_size (str): Maximum file size for uploads (default: "10MB")
         - public (bool): Enable public URL mode (default: False)
         - limit (int): Maximum number of concurrent requests (default: 10)
+        - quiet (bool): Enable quiet mode (default: False)
         """
         from webui import FacemakerWebUI
-        FacemakerWebUI(self, host=host, port=port, browser=browser, upload_size=upload_size, public=public, limit=limit)
+        FacemakerWebUI(self, host=host, port=port, browser=browser, upload_size=upload_size,
+                       public=public, limit=limit, quiet=quiet)
 
     def __download_models(self):
         """Downloads models from the given URL."""
