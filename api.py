@@ -1,4 +1,4 @@
-def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool = False):
+def FacemakerWebAPI(client, host: str = None, port: int = None, debug: bool = False):
     """
     Start Client API server with all endpoints.
     
@@ -359,7 +359,6 @@ def FacemakerWebAPI(client, host: str = "0.0.0.0", port: int = 3223, debug: bool
                     'error': str(e)
                 })
         
-        client.logger.info(f"Starting API server on {host}:{port}")
         app.run(host=host, port=port, debug=debug)
     
     except Exception as e:

@@ -92,28 +92,28 @@ class FacemakerFM2:
         else:
             raise ValueError(f"Invalid startup mode: {mode}")
 
-    def start_api(self, host: str = "0.0.0.0", port: int = 3223, debug: bool = False):
+    def start_api(self, host: str = "0.0.0.0", port: int = None, debug: bool = False):
         """
         Start API server with all endpoints.
 
         Parameters:
         - host (str): Host to run the server on (default: "0.0.0.0")
-        - port (int): Port to run the server on (default: 3223)
+        - port (int): Port to run the server on (default: None)
         - debug (bool): Enable Flask debug mode (default: False)
         """
         from api import FacemakerWebAPI
         FacemakerWebAPI(self, host=host, port=port, debug=debug)
         
-    def start_webui(self, host: str = "0.0.0.0", port: int = 7860, browser: bool = False, upload_size: str = "10MB", 
+    def start_webui(self, host: str = None, port: int = None, browser: bool = False, upload_size: str = "100MB", 
                     public: bool = False, limit: int = 10, quiet: bool = False):
         """
         Start WebUI with all features.
         
         Parameters:
-        - host (str): Server host (default: "0.0.0.0")
-        - port (int): Server port (default: 7860) 
+        - host (str): Server host (default: None)
+        - port (int): Server port (default: None) 
         - browser (bool): Launch browser automatically (default: False)
-        - upload_size (str): Maximum file size for uploads (default: "10MB")
+        - upload_size (str): Maximum file size for uploads (default: "100MB")
         - public (bool): Enable public URL mode (default: False)
         - limit (int): Maximum number of concurrent requests (default: 10)
         - quiet (bool): Enable quiet mode (default: False)
