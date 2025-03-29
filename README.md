@@ -117,11 +117,12 @@ fm = FacemakerFM2(mode='webui')
 # OR
 fm.start_webui(
     host="0.0.0.0",
-    port=3225,
+    port=7860,
     browser=True,
     upload_size="10MB",
     public=False,
-    limit=10
+    limit=10,
+    quiet=False
 )
 ```
 

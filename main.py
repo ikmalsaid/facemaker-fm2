@@ -104,14 +104,14 @@ class FacemakerFM2:
         from api import FacemakerWebAPI
         FacemakerWebAPI(self, host=host, port=port, debug=debug)
         
-    def start_webui(self, host: str = "0.0.0.0", port: int = 7680, browser: bool = False, upload_size: str = "10MB", 
+    def start_webui(self, host: str = "0.0.0.0", port: int = 7860, browser: bool = False, upload_size: str = "10MB", 
                     public: bool = False, limit: int = 10, quiet: bool = False):
         """
         Start WebUI with all features.
         
         Parameters:
         - host (str): Server host (default: "0.0.0.0")
-        - port (int): Server port (default: 7680) 
+        - port (int): Server port (default: 7860) 
         - browser (bool): Launch browser automatically (default: False)
         - upload_size (str): Maximum file size for uploads (default: "10MB")
         - public (bool): Enable public URL mode (default: False)
