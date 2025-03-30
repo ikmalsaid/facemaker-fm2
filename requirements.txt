@@ -1,5 +1,6 @@
 gradio==4.38.1
 fastapi==0.112.4
+pydantic==2.10.6
 opencv-python-headless
 onnx==1.16.2
 onnxruntime-gpu==1.18.0
